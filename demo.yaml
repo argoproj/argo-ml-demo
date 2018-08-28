@@ -18,7 +18,7 @@ spec:
       artifacts:
       - name: CODE
         git: 
-          repo: https://github.com/EliZucker/Argo-Workflow-Test.git
+          repo: https://github.com/argoproj/argo-ml-demo.git
     steps:
     #download image from online URL
     - - name: DOWNLOAD-IMAGE

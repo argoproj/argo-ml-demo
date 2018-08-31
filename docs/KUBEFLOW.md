@@ -13,6 +13,14 @@ Guide for those looking to run Kubeflow Version 0.2.2 on their Kuberenetes Clust
 brew install ksonnet/tap/ks
 ```
 
+### RBAC
+
+Before deploying kubeflow make sure you have cluster admin privileges on your kubernetes cluster
+
+```bash
+kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+```
+
 ### Install Kubeflow
 Kubeflow is required in order to deploy the custom resources that use Tensorflow: TFJobs.
 

@@ -136,10 +136,14 @@ spec:
       image: gcr.io/argo-edan/newfacedetect
       command: ["bash", "-c"]
       args: ["cd /root/facedetection &&
-      git clone https://github.com/EliZucker/Argo-Workflow-Test.git &&
-      mv /root/facedetection/Argo-Workflow-Test/find_faces.py /root/facedetection &&
+      git clone https://github.com/argoproj/argo-ml-demo.git &&
+      mv /root/facedetection/argo-ml-demo/find_faces.py /root/facedetection &&
       cd - &&
+      echo 'Starting face finding' &&
       python /root/facedetection/find_faces.py"]
+      resources:
+        requests:
+          memory: 11Gi
     outputs:
       parameters:
       - name: imagemagick-commands
@@ -271,7 +275,7 @@ spec:
                       claimName: face-processing-demo-pvc
                   containers:
                   - args:
-                    - "curl https://raw.githubusercontent.com/EliZucker/Argo-Workflow-Test/master/deploy.sh
+                    - "curl https://raw.githubusercontent.com/argoproj/argo-ml-demo/master/deploy.sh
                       | bash"
                     command:
                     - /bin/sh

@@ -28,7 +28,8 @@ Now all thats left to deploy kubeflow is a couple ksonnet commands which can onl
 ```bash
 #The first two commands are for running deploying kubeflow in a new namespace.
 #Without these commands kubeflow will deploy to the default namespace
-$NAMESPACE = mykubeflow
+cd kubeflow_ks_app
+NAMESPACE=mykubeflow
 kubectl create ns $NAMESPACE
 ks env set default --namespace=$NAMESPACE
 ks apply default

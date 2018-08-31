@@ -50,6 +50,10 @@ kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container
 
 ##### This project uses some custom docker images in the workflow. The face recognition project can be found [here](https://github.com/EliZucker/face_recognition)
 
+### Give Workflow RBAC privileges
+In order for a workflow to create custom resources (e.g. TensorflowJob), a cluster-admin role should be used. The following will grant the default service account in the default namespace cluster-admin:
+```kubectl create rolebinding default-admin --clusterrole=cluster-admin --serviceaccount=default:default```
+
 ### Deploy Our Project
 ```bash
 git clone https://github.com/argoproj/argo-ml-demo.git

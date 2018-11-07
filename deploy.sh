@@ -6,7 +6,7 @@ sudo apt-get update && sudo apt-get install google-cloud-sdk -y
 git clone https://github.com/YadiraF/PRNet
 cd PRNet
 
-gsutil cp gs://argo-ml-demo/0/256_256_resfcn256_weight.data-00000-of-00001 ./Data/net-data/256_256_resfcn256_weight.data-00000-of-00001
+gsutil cp gs://kubecon-demo/0/256_256_resfcn256_weight.data-00000-of-00001 ./Data/net-data/256_256_resfcn256_weight.data-00000-of-00001
 
 mkdir inputdir
 mkdir outputdir

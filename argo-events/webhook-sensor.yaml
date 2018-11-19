@@ -158,7 +158,7 @@ spec:
                 container:
                   image: gcr.io/kubecon-sb/face_recognition
                   command: ["bash", "-c"]
-                  args: ["sleep 5m; cd /root/facedetection &&
+                  args: ["cd /root/facedetection &&
                   git clone https://github.com/argoproj/argo-ml-demo.git &&
                   mv /root/facedetection/argo-ml-demo/find_faces.py /root/facedetection &&
                   cd - &&

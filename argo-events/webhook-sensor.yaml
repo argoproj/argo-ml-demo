@@ -26,7 +26,7 @@ spec:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: eli-edan-argo-workflow-
+              generateName: argo-ml-demo-workflow-
             spec:
               arguments:
                 parameters:

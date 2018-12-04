@@ -37,7 +37,7 @@ spec:
               - name: workdir
                 #we use a PVC to transfer artifacts to a custom resource
                 persistentVolumeClaim:
-                  claimName: face-processing-demo-pvc
+                  claimName: "{{workflow.name}}"
               templates:
               - name: face-project
                 inputs:
@@ -49,61 +49,61 @@ spec:
                       repo: https://github.com/argoproj/argo-ml-demo.git
                 steps:
                 #download image from online URL
-                - - name: DOWNLOAD-IMAGE
+                - - name: Download-Image
                     template: download-image
                     arguments:
                       parameters:
                       - name: image-url
                         value: "{{inputs.parameters.image-url}}"
                 #applys a persistent volume claim (used later in the 2d->3d step)
-                  - name: APPLY-PVC
+                  - name: Apply-PVC
                     template: apply-pvc
                 #find dimensions/location of each face
-                - - name: LOCATE-FACES
+                - - name: Locate-Faces
                     template: locate-faces
                     arguments:
                       artifacts:
                       - name: RAW-IMAGE
-                        from: "{{steps.DOWNLOAD-IMAGE.outputs.artifacts.IMAGE}}"
+                        from: "{{steps.Download-Image.outputs.artifacts.IMAGE}}"
                 #generate unique token (used to identify original input in tfjob)
-                  - name: GENERATE-TOKEN
+                  - name: Generate-Token
                     template: generate-token
                 #template encapsulates the steps for each individual face 
-                - - name: HANDLE-INDIVIDUAL-FACES
+                - - name: Handle-Individual-Faces
                     template: handle-individual-faces
                     arguments:
                       artifacts:
                       - name: RAW-IMAGE
-                        from: "{{steps.DOWNLOAD-IMAGE.outputs.artifacts.IMAGE}}"
+                        from: "{{steps.Download-Image.outputs.artifacts.IMAGE}}"
                       - name: CODE
                         from: "{{inputs.artifacts.CODE}}"
                       parameters:
                       - name: TOKEN
-                        value: "{{steps.GENERATE-TOKEN.outputs.result}}"
+                        value: "{{steps.Generate-Token.outputs.result}}"
                       #diverge paths based on the imagemagick commands returned from locate-faces
                       - name: imagemagick-command
                         value: "{{item}}"
-                    withParam: "{{steps.LOCATE-FACES.outputs.parameters.imagemagick-commands}}"
+                    withParam: "{{steps.Locate-Faces.outputs.parameters.imagemagick-commands}}"
                 #after individual face processing, convert all of the 2d faces to 3d
                 - - name: TFJOB
                     template: tfjob
                     #only run when 1 or more faces are detected
-                    when: "{{steps.LOCATE-FACES.outputs.parameters.imagemagick-commands}} != []"
+                    when: "{{steps.Locate-Faces.outputs.parameters.imagemagick-commands}} != []"
                 #insert 3d face models back into the workflow (PVC->Artifact)
-                - - name: TF-RESULT-TO-ARTIFACT
+                - - name: TF-Result-To-Artifact
                     template: tf-result-to-artifact
-                    when: "{{steps.LOCATE-FACES.outputs.parameters.imagemagick-commands}} != []"   
+                    when: "{{steps.Locate-Faces.outputs.parameters.imagemagick-commands}} != []"   
                     arguments:
                       parameters:
                       - name: TOKEN
-                        value: "{{steps.GENERATE-TOKEN.outputs.result}}"
+                        value: "{{steps.Generate-Token.outputs.result}}"
                       artifacts:
                       - name: "CODE"
                         from: "{{inputs.artifacts.CODE}}"
                 #conditional step for if no face is found
-                  - name: No-FACES-FOUND
+                  - name: No-Faces-Found
                     template: noimage
-                    when: "{{steps.LOCATE-FACES.outputs.parameters.imagemagick-commands}} == []"
+                    when: "{{steps.Locate-Faces.outputs.parameters.imagemagick-commands}} == []"
               #convert direct image URL to artifact
               - name: download-image
                 inputs:
@@ -125,7 +125,7 @@ spec:
                     kind: PersistentVolumeClaim
                     apiVersion: v1
                     metadata:
-                      name: face-processing-demo-pvc
+                      name: "{{workflow.name}}"
                     spec:
                       accessModes: [ "ReadWriteOnce" ]
                       resources:
@@ -187,7 +187,7 @@ spec:
                   - name: RAW-IMAGE
                   - name: CODE
                 steps:
-                - - name: CROP-FACE
+                - - name: Crop-Face
                     template: crop-face
                     arguments:
                       artifacts:
@@ -196,18 +196,8 @@ spec:
                       parameters:
                       - name: imagemagick-command
                         value: "{{inputs.parameters.imagemagick-command}}"
-                # This is an example conditional step we never ended up using
-                # - - name: CHECK-FACE-MATCH
-                #     template: check-face-match
-                #     arguments:
-                #       artifacts:
-                #         - name: CROPPED-FACE
-                #           from: "{{steps.CROP-FACE.outputs.artifacts.CROPPED-FACE}}"
-                #         - name: CODE
-                #           from: "{{inputs.artifacts.CODE}}"
-                
                 #place cropped face in volume
-                - - name: VOLUMIZE-RESULT
+                - - name: Volumize-Result
                     template: volumize-result
                     arguments:
                       parameters:
@@ -217,7 +207,7 @@ spec:
                         - name: CODE
                           from: "{{inputs.artifacts.CODE}}"
                         - name: CROPPED-FACE
-                          from: "{{steps.CROP-FACE.outputs.artifacts.CROPPED-FACE}}"
+                          from: "{{steps.Crop-Face.outputs.artifacts.CROPPED-FACE}}"
 
               #run the supplied imagemagick commands to crop the face
               - name: crop-face
@@ -236,22 +226,6 @@ spec:
                   - name: CROPPED-FACE
                     path: /tmp/cropped_face.jpg
               
-              # No idea if this would work, it was that conditional step being developed
-              # - name: check-face-match
-              #   inputs:
-              #     artifacts:
-              #     - name: CROPPED-FACE
-              #       path: /tmp/photo.jpg
-              #     - name: CODE
-              #       path: /src
-              #   script:
-              #     image: gcr.io/argo-edan/facerec
-              #     command: [python,  /src/facereference.py]
-              # - name: placeholder-step
-              #   container:
-              #     image: gcr.io/argo-edan/facerec
-              #     command: [python,  /src/facereference.py]
-
               #take CROPPED-FACE and put it workdir
               - name: volumize-result
                 inputs:
@@ -299,7 +273,7 @@ spec:
                               volumes:
                               - name: workdir
                                 persistentVolumeClaim:
-                                  claimName: face-processing-demo-pvc
+                                  claimName: "{{workflow.name}}"
                               containers:
                               - args:
                                 - "curl https://raw.githubusercontent.com/argoproj/argo-ml-demo/kubecon/deploy.sh
